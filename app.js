@@ -566,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Authentication Modal Functions
 function openLoginModal() {
-    document.getElementById('login-modal').style.display = 'block';
+    document.getElementById('login-modal').style.display = 'flex';
 }
 
 function closeLoginModal() {
@@ -575,7 +575,7 @@ function closeLoginModal() {
 }
 
 function openRegisterModal() {
-    document.getElementById('register-modal').style.display = 'block';
+    document.getElementById('register-modal').style.display = 'flex';
 }
 
 function closeRegisterModal() {
@@ -597,15 +597,15 @@ function switchToRegister(event) {
 
 function handleLoginSubmit(event) {
     event.preventDefault();
-    const email = document.getElementById('login-email').value;
+    const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
 
-    if (!email || !password) {
+    if (!username || !password) {
         alert('Please fill in all fields');
         return;
     }
 
-    alert(`Demo Login Preview:\n\nEmail: ${email}\nPassword: ••••••••\n\nIn the full application, your login would be verified against the database.\n\nYou would then have access to your bookings and profile.`);
+    alert(`Demo Login Preview:\n\nUsername: ${username}\nPassword: ••••••••\n\nIn the full application, your login would be verified against the database.\n\nYou would then have access to your bookings and profile.`);
     
     closeLoginModal();
 }
@@ -614,20 +614,16 @@ function handleRegisterSubmit(event) {
     event.preventDefault();
     const username = document.getElementById('register-username').value;
     const email = document.getElementById('register-email').value;
+    const firstname = document.getElementById('register-firstname').value;
+    const lastname = document.getElementById('register-lastname').value;
     const password = document.getElementById('register-password').value;
-    const confirm = document.getElementById('register-confirm').value;
 
-    if (!username || !email || !password || !confirm) {
+    if (!username || !email || !firstname || !lastname || !password) {
         alert('Please fill in all fields');
         return;
     }
 
-    if (password !== confirm) {
-        alert('Passwords do not match');
-        return;
-    }
-
-    alert(`Demo Registration Preview:\n\nUsername: ${username}\nEmail: ${email}\n\nYour account has been created successfully!\n\nIn the full application, this data would be saved to the database and you could immediately login.`);
+    alert(`Demo Registration Preview:\n\nUsername: ${username}\nEmail: ${email}\nName: ${firstname} ${lastname}\n\nYour account has been created successfully!\n\nIn the full application, this data would be saved to the database and you could immediately login.`);
     
     closeRegisterModal();
 }
