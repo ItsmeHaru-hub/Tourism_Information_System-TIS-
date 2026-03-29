@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabadbaran TIS | Tourism Information System - Offline Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2><i class="fas fa-map-marked-alt"></i> Cabadbaran<span style="color: white;">TIS</span></h2>
+            <p class="tagline">Discover. Experience. Support Local.
+        </div>
+        <div class="nav-links">
+            <button class="nav-btn active" data-page="home" title="Home Page"><i class="fas fa-home"></i> Home</button>
+            <button class="nav-btn" data-page="explore" title="Explore Destinations"><i class="fas fa-compass"></i> Explore</button>
+            <button class="nav-btn" data-page="booking" title="Book Services"><i class="fas fa-calendar-check"></i> Book</button>
+            <button class="nav-btn" data-page="info" title="Travel Information"><i class="fas fa-info-circle"></i> Info</button>
+            <button class="nav-btn" data-page="feedback" title="Share Feedback"><i class="fas fa-star"></i> Feedback</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="app-content">
+        <!-- Home Page -->
+        <div id="home-page" class="page active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1>Welcome to Cabadbaran City</h1>
+                    <p>Gateway to the Highest Peak in Caraga | Where Nature Meets Heritage</p>
+                    <button class="btn-primary" onclick="navigateTo('explore')"><i class="fas fa-eye"></i> Start Exploring</button>
+                </div>
+            </div>
+            
+            <div class="section-title"><i class="fas fa-chart-line"></i> Tourism Impact</div>
+            <div class="stats-grid">
+                <div class="stat-card"><i class="fas fa-mountain"></i><span>8</span><p>Attractions</p></div>
+                <div class="stat-card"><i class="fas fa-bed"></i><span>4</span><p>Accommodations</p></div>
+                <div class="stat-card"><i class="fas fa-ticket-alt"></i><span>156</span><p>Total Bookings</p></div>
+                <div class="stat-card"><i class="fas fa-star"></i><span>4.7</span><p>Avg Rating</p></div>
+            </div>
+
+            <div class="section-title"><i class="fas fa-star-of-life"></i> Featured Experiences</div>
+            <div class="featured-grid" id="featured-grid"></div>
+
+            <div class="card">
+                <h3><i class="fas fa-hand-holding-heart"></i> Community Impact</h3>
+                <p>🌱 Your tourism supports <strong>50+ local guides</strong>, <strong>20+ small businesses</strong>, and <strong>cultural preservation programs</strong> in Cabadbaran City.</p>
+                <p style="margin-top: 0.5rem;">🏡 Every booking helps fund community-based eco-tourism initiatives and local livelihood programs.</p>
+                <p style="margin-top: 0.5rem;">🎉 The Kahimunan Festival and other local events showcase our rich cultural heritage.</p>
+            </div>
+        </div>
+
+        <!-- Explore Page -->
+        <div id="explore-page" class="page">
+            <h2 class="section-title"><i class="fas fa-mountain"></i> Explore Cabadbaran's Treasures</h2>
+            
+            <!-- Search and Controls Bar -->
+            <div class="explore-controls">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search destinations...">
+                </div>
+                <div class="controls-group">
+                    <select id="sort-select" class="control-select">
+                        <option value="default">Sort By</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                    </select>
+                    <button id="filter-toggle" class="control-btn" title="Advanced Filters">
+                        <i class="fas fa-sliders-h"></i> Filters
+                    </button>
+                    <button id="view-toggle" class="control-btn" title="Toggle View">
+                        <i class="fas fa-th"></i> Grid
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced Filters Panel -->
+            <div id="filters-panel" class="filters-panel hidden">
+                <div class="filters-content">
+                    <div class="filter-group">
+                        <label>Category</label>
+                        <div class="filter-tabs">
+                            <button class="filter-btn active" data-category="all">All</button>
+                            <button class="filter-btn" data-category="Mountain">Mountains</button>
+                            <button class="filter-btn" data-category="Nature">Nature</button>
+                            <button class="filter-btn" data-category="Cultural">Cultural</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Info -->
+            <div class="explore-info">
+                <span id="results-count">All destinations</span>
+            </div>
+
+            <!-- Destinations Display -->
+            <div class="destinations-grid" id="destinations-grid"></div>
+        </div>
+
+        <!-- Destination Detail Modal -->
+        <div id="detail-modal" class="modal">
+            <div class="modal-content detail-modal-content">
+                <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+                <div class="modal-body">
+                    <img id="detail-image" src="" alt="" class="detail-image">
+                    <div class="detail-info">
+                        <div class="detail-header">
+                            <h2 id="detail-name"></h2>
+                        </div>
+                        <div class="detail-meta">
+                            <span class="category-badge" id="detail-category"></span>
+                            <div class="rating-display">
+                                <i class="fas fa-star"></i>
+                                <span id="detail-rating">0</span>
+                                <span id="detail-reviews">(0 reviews)</span>
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <h4>Location</h4>
+                            <p id="detail-location"></p>
+                        </div>
+                        <div class="detail-section">
+                            <h4>Description</h4>
+                            <p id="detail-description"></p>
+                        </div>
+                        <div class="detail-section">
+                            <h4>Hours</h4>
+                            <p id="detail-hours"></p>
+                        </div>
+                        <div class="detail-section">
+                            <h4>Entrance Fee</h4>
+                            <p id="detail-fee"></p>
+                        </div>
+                        <div class="detail-section">
+                            <h4>Visitor Reviews</h4>
+                            <div id="detail-reviews-list" class="reviews-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Page -->
+        <div id="booking-page" class="page">
+            <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Book Your Experience</h2>
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> This is a demo of the booking system. In the full application, you can manage reservations for tours, accommodations, and transportation.
+            </div>
+            <div class="card">
+                <h3>Book Tours, Accommodations, or Transportation</h3>
+                <form id="booking-form" onsubmit="handleDemoSubmit(event)">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Full Name *</label>
+                        <input type="text" id="booking-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email *</label>
+                        <input type="email" id="booking-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Phone</label>
+                        <input type="tel" id="booking-phone">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-concierge-bell"></i> Service Type *</label>
+                        <select id="service-type" required>
+                            <option value="">-- Select Service Type --</option>
+                            <option value="tour">Tour / Attraction</option>
+                            <option value="accommodation">Hotel / Accommodation</option>
+                            <option value="transportation">Transportation (Van, Tricycle, Motorcycle)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Date *</label>
+                        <input type="date" id="booking-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-users"></i> Number of Guests/Passengers *</label>
+                        <input type="number" id="booking-guests" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-comment"></i> Special Requests</label>
+                        <textarea id="special-requests" rows="3" placeholder="e.g., Specific hotel preferences, dietary restrictions, special needs..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary"><i class="fas fa-check-circle"></i> Preview Booking</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Info Page -->
+        <div id="info-page" class="page">
+            <h2 class="section-title"><i class="fas fa-info-circle"></i> Traveler's Guide & Local Info</h2>
+            
+            <div class="destinations-grid">
+                <div class="card">
+                    <h3><i class="fas fa-plane-departure"></i> Getting Here</h3>
+                    <p><strong>By Air:</strong> Nearest airport is Butuan City Airport (45 mins away)</p>
+                    <p><strong>By Land:</strong> 6-7 hours from Manila or 1.5 hours from Surigao City</p>
+                    <p><strong>From Butuan City:</strong> Van/Bus 30-45 mins (PHP 50-70)</p>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-bus"></i> Local Transportation</h3>
+                    <p>🚌 <strong>Ceres Bus:</strong> Regular service to/from Butuan<br>🛺 <strong>Tricycles:</strong> PHP 10-50 per trip (main transportation)<br>🏍️ <strong>Motorcycle Rentals:</strong> PHP 300-500/day<br>🚗 <strong>Car Rentals:</strong> Contact Tourism Office (085) 817-1001</p>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-cloud-sun"></i> Weather & Best Time to Visit</h3>
+                    <p><strong>Best Season:</strong> December to May (Dry Season)</p>
+                    <p><strong>Avg Temperature:</strong> 25-32°C year-round</p>
+                    <p><strong>Rainy Season:</strong> June to November (occasional flooding)</p>
+                    <p><strong>Typhoon Risk:</strong> Minimal in Caraga region</p>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-utensils"></i> Local Cuisine & Dining</h3>
+                    <p>🍲 <strong>Sinuglaw</strong> - grilled pork + fish ceviche (specialty)<br>🌾 <strong>Palagsing</strong> - local sticky rice dessert<br>🍤 <strong>Fresh Seafood</strong> - daily catch from local fishermen<br>🥥 <strong>Buko Juice</strong> - fresh coconut from nearby farms</p>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-calendar-week"></i> Major Events & Festivals</h3>
+                    <p><strong>Kahimunan Festival</strong> (May) - Celebrates local culture & harvest<br><strong>Local fiestas</strong> - Various barangay celebrations throughout the year<br><strong>Holy Week</strong> - Religious processions & events</p>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-mountain"></i> Popular Activities</h3>
+                    <p><strong>Mountain Climbing:</strong> Mag-Inde Peak, lush rainforests<br><strong>Swimming:</strong> Natural pools, waterfalls (Agusan River)<br><strong>Camping:</strong> Designated campsites for adventure seekers<br><strong>Hiking:</strong> Nature trails with scenic views</p>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-bed"></i> Accommodation Tips</h3>
+                    <p><strong>Hotels:</strong> Budget to mid-range options available (PHP 800-3,000/night)<br><strong>Booking:</strong> Reserve in advance during peak season (Dec-Jan)<br><strong>Facilities:</strong> Most places have A/C, WiFi, & hot water</p>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-money-bill-wave"></i> Money & Budget Guide</h3>
+                    <p><strong>Currency:</strong> Philippine Peso (PHP) - 1 USD ≈ 56 PHP<br><strong>Daily Budget:</strong> PHP 1,500-2,500 for comfortable travel<br><strong>ATMs:</strong> Available in city proper & nearby bancarios</p>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-first-aid"></i> Health & Safety</h3>
+                    <p><strong>Medical:</strong> Hospital available in city proper (085) 817-3333<br><strong>Pharmacy:</strong> Several pharmacies with basic medications<br><strong>Travel Tips:</strong> Bring insect repellent & sunscreen</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Page -->
+        <div id="feedback-page" class="page">
+            <h2 class="section-title"><i class="fas fa-star"></i> Share Your Experience</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+                <div class="card">
+                    <h3>We'd Love Your Feedback!</h3>
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i> This is a demonstration of the feedback system. Your comments help us improve our tourism services.
+                    </div>
+                    <form id="feedback-form" onsubmit="handleDemoFeedback(event)">
+                        <div class="form-group">
+                            <label>Name *</label>
+                            <input type="text" id="feedback-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="feedback-email">
+                        </div>
+                        <div class="form-group">
+                            <label>Your Rating *</label>
+                            <div class="rating-stars" id="rating-stars">
+                                <i class="far fa-star" data-rating="1" style="cursor: pointer; transition: 0.2s;"></i>
+                                <i class="far fa-star" data-rating="2" style="cursor: pointer; transition: 0.2s;"></i>
+                                <i class="far fa-star" data-rating="3" style="cursor: pointer; transition: 0.2s;"></i>
+                                <i class="far fa-star" data-rating="4" style="cursor: pointer; transition: 0.2s;"></i>
+                                <i class="far fa-star" data-rating="5" style="cursor: pointer; transition: 0.2s;"></i>
+                            </div>
+                            <input type="hidden" id="feedback-rating">
+                        </div>
+                        <div class="form-group">
+                            <label>Your Comment *</label>
+                            <textarea id="feedback-comment" rows="4" placeholder="Share your experience..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Sample Visitor Reviews</h3>
+                    <div id="reviews-list" class="reviews-list">
+                        <div class="review-item">
+                            <div class="review-author">Maria Santos</div>
+                            <div class="review-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                            <div class="review-text">Amazing experience! The mountain views are breathtaking and the local guides are very knowledgeable. Highly recommended!</div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-author">Juan dela Cruz</div>
+                            <div class="review-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                            <div class="review-text">Great destination for adventure seekers. The hiking trails are well-maintained. Good value for money!</div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-author">Sarah Johnson</div>
+                            <div class="review-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                            <div class="review-text">Wonderful place to explore! The natural beauty and warm hospitality of the locals made our trip unforgettable.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Cabadbaran Tourism Information System | Offline Demo Version</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">This is a demonstration of the system's features for educational purposes.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
