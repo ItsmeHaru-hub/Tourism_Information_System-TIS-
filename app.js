@@ -455,6 +455,38 @@ function setupRatingStars() {
     });
 }
 
+// Update Service Select Dropdown
+function updateServiceSelect() {
+    const serviceType = document.getElementById('service-type').value;
+    const serviceSelect = document.getElementById('service-select');
+    
+    if (!serviceSelect) return;
+    
+    serviceSelect.innerHTML = '';
+    
+    let services = [];
+    
+    if (serviceType === 'tour') {
+        services = destinations.map(d => ({ name: d.name, fee: d.fee }));
+    } else if (serviceType === 'accommodation') {
+        services = accommodations;
+    } else if (serviceType === 'transportation') {
+        services = transportation;
+    }
+    
+    if (services.length === 0) {
+        serviceSelect.innerHTML = '<option>No services available</option>';
+        return;
+    }
+    
+    services.forEach((service, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${service.name} - ${service.fee}`;
+        serviceSelect.appendChild(option);
+    });
+}
+
 // Handle Demo Form Submissions
 function handleDemoSubmit(event) {
     event.preventDefault();
