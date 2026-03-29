@@ -563,3 +563,93 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Authentication Modal Functions
+function openLoginModal() {
+    document.getElementById('login-modal').style.display = 'block';
+}
+
+function closeLoginModal() {
+    document.getElementById('login-modal').style.display = 'none';
+    document.getElementById('login-form').reset();
+}
+
+function openRegisterModal() {
+    document.getElementById('register-modal').style.display = 'block';
+}
+
+function closeRegisterModal() {
+    document.getElementById('register-modal').style.display = 'none';
+    document.getElementById('register-form').reset();
+}
+
+function switchToLogin(event) {
+    event.preventDefault();
+    closeRegisterModal();
+    openLoginModal();
+}
+
+function switchToRegister(event) {
+    event.preventDefault();
+    closeLoginModal();
+    openRegisterModal();
+}
+
+function handleLoginSubmit(event) {
+    event.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    if (!email || !password) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    alert(`Demo Login Preview:\n\nEmail: ${email}\nPassword: ••••••••\n\nIn the full application, your login would be verified against the database.\n\nYou would then have access to your bookings and profile.`);
+    
+    closeLoginModal();
+}
+
+function handleRegisterSubmit(event) {
+    event.preventDefault();
+    const username = document.getElementById('register-username').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const confirm = document.getElementById('register-confirm').value;
+
+    if (!username || !email || !password || !confirm) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    if (password !== confirm) {
+        alert('Passwords do not match');
+        return;
+    }
+
+    alert(`Demo Registration Preview:\n\nUsername: ${username}\nEmail: ${email}\n\nYour account has been created successfully!\n\nIn the full application, this data would be saved to the database and you could immediately login.`);
+    
+    closeRegisterModal();
+}
+
+// Close modals when clicking outside
+document.addEventListener('DOMContentLoaded', () => {
+    const loginModal = document.getElementById('login-modal');
+    const registerModal = document.getElementById('register-modal');
+
+    if (loginModal) {
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                closeLoginModal();
+            }
+        });
+    }
+
+    if (registerModal) {
+        registerModal.addEventListener('click', (e) => {
+            if (e.target === registerModal) {
+                closeRegisterModal();
+            }
+        });
+    }
+});
