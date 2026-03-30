@@ -922,6 +922,7 @@ function handleLogout() {
         updateAuthUI();
         navigateTo('home');
         alert('You have been logged out successfully');
+        location.reload();
     }
 }
 
