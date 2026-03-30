@@ -684,11 +684,28 @@ function displayAllFeedback() {
 
 // Nav button click handlers
 document.addEventListener('DOMContentLoaded', () => {
+    // Hamburger menu toggle
+    const hamburger = document.getElementById('hamburger-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    
+    if (hamburger) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+    }
+    
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             const pageName = e.currentTarget.dataset.page;
             navigateTo(pageName);
+            
+            // Close hamburger menu after navigation
+            if (hamburger && navMenu) {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            }
         });
     });
 
