@@ -899,6 +899,48 @@ body {
     margin-right: 8px;
 }
 
+/* Mobile Navbar Toggle */
+@media screen and (max-width: 900px) {
+    .hamburger-menu {
+        display: flex;
+    }
+
+    .nav-links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        border-radius: 10px;
+        padding: 0.8rem;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        z-index: 999;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-btn,
+    .auth-buttons {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .navbar {
+        padding: 0.75rem 1rem;
+    }
+}
+
+
 .rating-stars i.fas {
     color: #ffc107;
 }
