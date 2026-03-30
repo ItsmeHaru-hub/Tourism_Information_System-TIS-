@@ -214,6 +214,8 @@ function navigateTo(pageName) {
         initHome();
     } else if (pageName === 'feedback') {
         initFeedback();
+    } else if (pageName === 'booking') {
+        initBooking();
     }
 }
 
@@ -401,9 +403,31 @@ function setupEventListeners() {
     }
 }
 
+// Initialize Booking Page
+function initBooking() {
+    const currentUser = storage.getCurrentUser();
+    if (!currentUser) {
+        document.getElementById('booking-page').innerHTML = `
+            <h2 class="section-title"><i class="fas fa-lock"></i> Booking Requires Login</h2>
+            <div class="card" style="text-align: center;">
+                <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">You must be logged in to make bookings.</p>
+                <button class="btn-primary" onclick="openLoginModal()" style="margin-right: 1rem;"><i class="fas fa-sign-in-alt"></i> Login</button>
+                <button class="btn-primary" style="background: #4CAF50;" onclick="openRegisterModal()"><i class="fas fa-user-plus"></i> Create Account</button>
+            </div>
+        `;
+        return;
+    }
+    
+    // Show booking form
+    const bookingPage = document.getElementById('booking-page');
+    updateServiceSelect(); // Initialize service select
+    showBookingHistory(); // Show booking history
+}
+
 // Initialize Feedback Page
 function initFeedback() {
     setupRatingStars();
+    displayAllFeedback();
 }
 
 // Setup Rating Stars
@@ -487,11 +511,19 @@ function updateServiceSelect() {
     });
 }
 
-// Handle Demo Form Submissions
+// Handle Demo Form Submissions - NOW WITH OFFLINE STORAGE
 function handleDemoSubmit(event) {
     event.preventDefault();
-    const name = document.getElementById('booking-name').value;
-    const email = document.getElementById('booking-email').value;
+    
+    const currentUser = storage.getCurrentUser();
+    if (!currentUser) {
+        alert('Please login first to make a booking');
+        openLoginModal();
+        return;
+    }
+
+    const name = document.getElementById('booking-name').value.trim();
+    const email = document.getElementById('booking-email').value.trim();
     const serviceType = document.getElementById('service-type').value;
     const date = document.getElementById('booking-date').value;
     const guests = document.getElementById('booking-guests').value;
@@ -501,41 +533,166 @@ function handleDemoSubmit(event) {
         return;
     }
 
+    // Get service name
+    let serviceName = '';
     const services = {
-        'tour': 'Tour / Attraction',
-        'accommodation': 'Hotel / Accommodation',
-        'transportation': 'Transportation'
+        'tour': destinations.find(d => d.id == document.getElementById('service-select').value),
+        'accommodation': accommodations[document.getElementById('service-select').value],
+        'transportation': transportation[document.getElementById('service-select').value]
     };
 
-    alert(`Demo Booking Preview:\n\nName: ${name}\nEmail: ${email}\nService: ${services[serviceType]}\nDate: ${date}\nGuests: ${guests}\n\nIn the full application, this booking would be saved and processed.`);
-    
-    // Reset form
-    event.target.reset();
+    const selectedService = services[serviceType];
+    serviceName = selectedService ? selectedService.name : '';
+
+    const bookingData = {
+        name,
+        email,
+        serviceType,
+        serviceName,
+        date,
+        guests: parseInt(guests),
+        notes: document.getElementById('booking-notes')?.value || ''
+    };
+
+    const result = storage.createBooking(bookingData);
+
+    if (result.success) {
+        alert(`✓ Booking Confirmed!\n\nBooking ID: #${result.booking.id}\nService: ${serviceName}\nDate: ${date}\nGuests: ${guests}\n\nStatus: Pending\n\nYour booking has been saved offline and will sync when online.`);
+        event.target.reset();
+        // Switch to booking history
+        showBookingHistory();
+    } else {
+        alert('✗ ' + result.message);
+    }
 }
 
 function handleDemoFeedback(event) {
     event.preventDefault();
-    const name = document.getElementById('feedback-name').value;
-    const email = document.getElementById('feedback-email').value;
+    
+    const name = document.getElementById('feedback-name').value.trim();
+    const email = document.getElementById('feedback-email').value.trim();
     const rating = document.getElementById('feedback-rating').value;
-    const comment = document.getElementById('feedback-comment').value;
+    const comment = document.getElementById('feedback-comment').value.trim();
 
     if (!name || !rating || !comment) {
         alert('Please fill in all required fields');
         return;
     }
 
-    alert(`Demo Feedback Preview:\n\nName: ${name}\nEmail: ${email}\nRating: ${rating} stars\nComment: ${comment}\n\nIn the full application, this feedback would be saved to the database and displayed on the system.`);
+    const feedbackData = {
+        name,
+        email,
+        rating: parseInt(rating),
+        comment,
+        destination: document.getElementById('feedback-destination')?.value || 'General'
+    };
+
+    const result = storage.createFeedback(feedbackData);
+
+    if (result.success) {
+        alert(`✓ Thank you for your feedback!\n\nFeedback ID: #${result.feedback.id}\nRating: ${rating} stars\n\nYour feedback has been saved offline and will sync when online.`);
+        
+        // Reset form
+        event.target.reset();
+        document.getElementById('feedback-rating').value = '';
+        const stars = document.querySelectorAll('#rating-stars i');
+        stars.forEach(s => {
+            s.classList.remove('fas');
+            s.classList.add('far');
+            s.style.color = '#ddd';
+        });
+        
+        // Show feedback list
+        displayAllFeedback();
+    } else {
+        alert('✗ ' + result.message);
+    }
+}
+
+// Booking History Display
+function showBookingHistory() {
+    const bookings = storage.getUserBookings();
+    const historyDiv = document.createElement('div');
+    historyDiv.id = 'booking-history';
+    historyDiv.innerHTML = '<h3><i class="fas fa-history"></i> Your Bookings</h3>';
     
-    // Reset form
-    event.target.reset();
-    document.getElementById('feedback-rating').value = '';
-    const stars = document.querySelectorAll('#rating-stars i');
-    stars.forEach(s => {
-        s.classList.remove('fas');
-        s.classList.add('far');
-        s.style.color = '#ddd';
-    });
+    if (bookings.length === 0) {
+        historyDiv.innerHTML += '<p style="color: #999;">No bookings yet.</p>';
+    } else {
+        historyDiv.innerHTML += '<div class="bookings-list">';
+        bookings.forEach(booking => {
+            historyDiv.innerHTML += `
+                <div class="booking-card-item" style="border: 1px solid #ddd; padding: 1rem; margin: 0.5rem 0; border-radius: 8px; background: #f9f9f9;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <strong>#${booking.id}</strong> - ${booking.serviceName}<br>
+                            <small>Date: ${booking.date} | Guests: ${booking.guests} | Status: <span style="color: #f59e0b; font-weight: bold;">${booking.status}</span></small>
+                        </div>
+                        <button class="btn-danger" onclick="deleteBooking(${booking.id})" style="padding: 0.4rem 0.8rem; font-size: 0.9rem; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+        historyDiv.innerHTML += '</div>';
+    }
+    
+    // Insert or replace in booking page
+    const bookingPage = document.getElementById('booking-page');
+    const existingHistory = bookingPage.querySelector('#booking-history');
+    if (existingHistory) {
+        existingHistory.replaceWith(historyDiv);
+    } else {
+        bookingPage.appendChild(historyDiv);
+    }
+}
+
+function deleteBooking(bookingId) {
+    if (confirm('Are you sure you want to delete this booking?')) {
+        const result = storage.deleteBooking(bookingId);
+        if (result.success) {
+            alert('✓ Booking deleted successfully');
+            showBookingHistory();
+        } else {
+            alert('✗ ' + result.message);
+        }
+    }
+}
+
+// Display All Feedback
+function displayAllFeedback() {
+    const allFeedback = storage.getAllFeedback();
+    const feedbackPage = document.getElementById('feedback-page');
+    let feedbackDisplay = feedbackPage.querySelector('#feedback-display');
+    
+    if (!feedbackDisplay) {
+        feedbackDisplay = document.createElement('div');
+        feedbackDisplay.id = 'feedback-display';
+        feedbackDisplay.style.marginTop = '2rem';
+        feedbackPage.appendChild(feedbackDisplay);
+    }
+
+    if (allFeedback.length === 0) {
+        feedbackDisplay.innerHTML = '<p style="color: #999; text-align: center;">No feedback yet. Be the first to share!</p>';
+    } else {
+        feedbackDisplay.innerHTML = '<h3><i class="fas fa-comments"></i> Recent Feedback</h3>';
+        feedbackDisplay.innerHTML += '<div class="feedback-list">';
+        allFeedback.slice(0, 10).forEach(feedback => {
+            const rating = '⭐'.repeat(feedback.rating);
+            feedbackDisplay.innerHTML += `
+                <div class="feedback-item" style="border: 1px solid #e0e7e3; padding: 1rem; margin: 0.8rem 0; border-radius: 8px; background: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <strong>${feedback.name}</strong> <small style="color: #999;">${feedback.username}</small><br>
+                            <div style="color: #f59e0b; margin: 0.3rem 0;">${rating}</div>
+                            <p style="margin: 0.5rem 0; color: #333;">${feedback.comment}</p>
+                            <small style="color: #999;">${new Date(feedback.createdAt).toLocaleString()}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        feedbackDisplay.innerHTML += '</div>';
+    }
 }
 
 // Nav button click handlers
@@ -550,6 +707,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize home page
     initHome();
+    
+    // Update auth UI
+    updateAuthUI();
+    
+    // Initialize booking history on home load (if user is logged in)
+    if (storage.isLoggedIn()) {
+        showBookingHistory();
+    }
 });
 
 // Handle modal close on background click
@@ -564,7 +729,198 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Authentication Modal Functions
+// =================== OFFLINE STORAGE SYSTEM ===================
+
+class OfflineStorage {
+    constructor() {
+        this.USERS_KEY = 'tis_users';
+        this.CURRENT_USER_KEY = 'tis_current_user';
+        this.BOOKINGS_KEY = 'tis_bookings';
+        this.FEEDBACK_KEY = 'tis_feedback';
+        this.initDefaultData();
+    }
+
+    initDefaultData() {
+        if (!localStorage.getItem(this.USERS_KEY)) {
+            // Create a demo user for testing
+            const demoUsers = [
+                {
+                    id: 1,
+                    username: 'demo',
+                    password: 'demo',
+                    email: 'demo@example.com',
+                    firstname: 'Demo',
+                    lastname: 'User',
+                    createdAt: new Date().toISOString()
+                }
+            ];
+            localStorage.setItem(this.USERS_KEY, JSON.stringify(demoUsers));
+        }
+        if (!localStorage.getItem(this.BOOKINGS_KEY)) {
+            localStorage.setItem(this.BOOKINGS_KEY, JSON.stringify([]));
+        }
+        if (!localStorage.getItem(this.FEEDBACK_KEY)) {
+            localStorage.setItem(this.FEEDBACK_KEY, JSON.stringify([]));
+        }
+    }
+
+    // User Management
+    registerUser(username, email, firstname, lastname, password) {
+        const users = JSON.parse(localStorage.getItem(this.USERS_KEY)) || [];
+        
+        // Check if username or email exists
+        if (users.find(u => u.username === username)) {
+            return { success: false, message: 'Username already exists' };
+        }
+        if (users.find(u => u.email === email)) {
+            return { success: false, message: 'Email already registered' };
+        }
+
+        const newUser = {
+            id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+            username,
+            email,
+            firstname,
+            lastname,
+            password, // In production, use hashing!
+            createdAt: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+        return { success: true, message: 'Registration successful', user: newUser };
+    }
+
+    loginUser(username, password) {
+        const users = JSON.parse(localStorage.getItem(this.USERS_KEY)) || [];
+        const user = users.find(u => u.username === username && u.password === password);
+
+        if (!user) {
+            return { success: false, message: 'Invalid username or password' };
+        }
+
+        // Store current user
+        localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname
+        }));
+
+        return { success: true, message: 'Login successful', user: user };
+    }
+
+    logoutUser() {
+        localStorage.removeItem(this.CURRENT_USER_KEY);
+        return { success: true, message: 'Logged out successfully' };
+    }
+
+    getCurrentUser() {
+        const userStr = localStorage.getItem(this.CURRENT_USER_KEY);
+        return userStr ? JSON.parse(userStr) : null;
+    }
+
+    isLoggedIn() {
+        return this.getCurrentUser() !== null;
+    }
+
+    // Booking Management
+    createBooking(bookingData) {
+        const bookings = JSON.parse(localStorage.getItem(this.BOOKINGS_KEY)) || [];
+        const currentUser = this.getCurrentUser();
+
+        if (!currentUser) {
+            return { success: false, message: 'Please login to make a booking' };
+        }
+
+        const newBooking = {
+            id: bookings.length > 0 ? Math.max(...bookings.map(b => b.id)) + 1 : 1,
+            userId: currentUser.id,
+            ...bookingData,
+            createdAt: new Date().toISOString(),
+            status: 'pending'
+        };
+
+        bookings.push(newBooking);
+        localStorage.setItem(this.BOOKINGS_KEY, JSON.stringify(bookings));
+        return { success: true, message: 'Booking created successfully', booking: newBooking };
+    }
+
+    getUserBookings() {
+        const currentUser = this.getCurrentUser();
+        if (!currentUser) return [];
+
+        const bookings = JSON.parse(localStorage.getItem(this.BOOKINGS_KEY)) || [];
+        return bookings.filter(b => b.userId === currentUser.id);
+    }
+
+    deleteBooking(bookingId) {
+        const bookings = JSON.parse(localStorage.getItem(this.BOOKINGS_KEY)) || [];
+        const currentUser = this.getCurrentUser();
+
+        const index = bookings.findIndex(b => b.id === bookingId && b.userId === currentUser.id);
+        if (index === -1) {
+            return { success: false, message: 'Booking not found' };
+        }
+
+        bookings.splice(index, 1);
+        localStorage.setItem(this.BOOKINGS_KEY, JSON.stringify(bookings));
+        return { success: true, message: 'Booking deleted' };
+    }
+
+    // Feedback Management
+    createFeedback(feedbackData) {
+        const feedback = JSON.parse(localStorage.getItem(this.FEEDBACK_KEY)) || [];
+        const currentUser = this.getCurrentUser();
+
+        const newFeedback = {
+            id: feedback.length > 0 ? Math.max(...feedback.map(f => f.id)) + 1 : 1,
+            userId: currentUser ? currentUser.id : null,
+            username: currentUser ? currentUser.username : 'Anonymous',
+            ...feedbackData,
+            createdAt: new Date().toISOString()
+        };
+
+        feedback.push(newFeedback);
+        localStorage.setItem(this.FEEDBACK_KEY, JSON.stringify(feedback));
+        return { success: true, message: 'Feedback submitted successfully', feedback: newFeedback };
+    }
+
+    getAllFeedback() {
+        const feedback = JSON.parse(localStorage.getItem(this.FEEDBACK_KEY)) || [];
+        return feedback.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+}
+
+// Initialize storage system
+const storage = new OfflineStorage();
+
+// =================== AUTHENTICATION MODAL FUNCTIONS ===================
+
+function updateAuthUI() {
+    const currentUser = storage.getCurrentUser();
+    const authButtons = document.querySelector('.auth-buttons');
+    
+    if (currentUser && authButtons) {
+        authButtons.innerHTML = `
+            <div style="color: #f0f2f5; font-weight: 600; margin-right: 1rem;">
+                <i class="fas fa-user-circle"></i> ${currentUser.firstname}
+            </div>
+            <button class="auth-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        `;
+    }
+}
+
+function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        storage.logoutUser();
+        updateAuthUI();
+        navigateTo('home');
+        alert('You have been logged out successfully');
+    }
+}
+
 function openLoginModal() {
     document.getElementById('login-modal').style.display = 'flex';
 }
@@ -597,25 +953,26 @@ function switchToRegister(event) {
 
 function handleLoginSubmit(event) {
     event.preventDefault();
-    const username = document.getElementById('login-username').value;
+    const username = document.getElementById('login-username').value.trim();
     const password = document.getElementById('login-password').value;
 
-    if (!username || !password) {
-        alert('Please fill in all fields');
-        return;
-    }
-
-    alert(`Demo Login Preview:\n\nUsername: ${username}\nPassword: ••••••••\n\nIn the full application, your login would be verified against the database.\n\nYou would then have access to your bookings and profile.`);
+    const result = storage.loginUser(username, password);
     
-    closeLoginModal();
+    if (result.success) {
+        alert('✓ Login successful! Welcome back.');
+        updateAuthUI();
+        closeLoginModal();
+    } else {
+        alert('✗ ' + result.message);
+    }
 }
 
 function handleRegisterSubmit(event) {
     event.preventDefault();
-    const username = document.getElementById('register-username').value;
-    const email = document.getElementById('register-email').value;
-    const firstname = document.getElementById('register-firstname').value;
-    const lastname = document.getElementById('register-lastname').value;
+    const username = document.getElementById('register-username').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const firstname = document.getElementById('register-firstname').value.trim();
+    const lastname = document.getElementById('register-lastname').value.trim();
     const password = document.getElementById('register-password').value;
 
     if (!username || !email || !firstname || !lastname || !password) {
@@ -623,9 +980,17 @@ function handleRegisterSubmit(event) {
         return;
     }
 
-    alert(`Demo Registration Preview:\n\nUsername: ${username}\nEmail: ${email}\nName: ${firstname} ${lastname}\n\nYour account has been created successfully!\n\nIn the full application, this data would be saved to the database and you could immediately login.`);
+    const result = storage.registerUser(username, email, firstname, lastname, password);
     
-    closeRegisterModal();
+    if (result.success) {
+        alert('✓ Account created successfully! You can now login.');
+        // Auto-login
+        storage.loginUser(username, password);
+        updateAuthUI();
+        closeRegisterModal();
+    } else {
+        alert('✗ ' + result.message);
+    }
 }
 
 // Close modals when clicking outside
