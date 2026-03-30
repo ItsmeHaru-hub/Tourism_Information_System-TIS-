@@ -8,7 +8,7 @@ const destinations = [
         description: "A majestic mountain peak offering stunning panoramic views of the surrounding landscapes. Home to rare endemic species and lush rainforests. Perfect for mountaineering enthusiasts.",
         hours: "6:00 AM - 5:00 PM",
         fee: "Free (Optional guide: ₱500)",
-        image: "Mount Pongkay.jpg",
+        image: "images/Mount Pongkay.jpg",
         emoji: "⛰️",
         rating: 4.8,
         reviews: 45,
@@ -25,7 +25,7 @@ const destinations = [
         description: "Crystal clear river perfect for swimming, kayaking, and enjoying natural pools. The river passes through pristine rainforest with scenic waterfalls along the way.",
         hours: "7:00 AM - 6:00 PM",
         fee: "Free",
-        image: "Cabadbaran River.jpg",
+        image: "images/Cabadbaran River.jpg",
         emoji: "💧",
         rating: 4.6,
         reviews: 38,
@@ -42,7 +42,7 @@ const destinations = [
         description: "The historic government center and architectural landmark. Experience local governance and cultural significance of the city. Beautiful structure showcasing local heritage.",
         hours: "9:00 AM - 5:00 PM",
         fee: "Free",
-        image: "Cabadbaran City Hall.jpg",
+        image: "images/Cabadbaran City Hall.jpg",
         emoji: "🏛️",
         rating: 4.3,
         reviews: 28,
@@ -59,7 +59,7 @@ const destinations = [
         description: "The vibrant heart of the city featuring gathering spaces, local markets, and cultural events. Perfect for experiencing authentic city life and local commerce.",
         hours: "24 Hours",
         fee: "Free to explore",
-        image: "Cabadbaran City Plaza.jpg",
+        image: "images/Cabadbaran City Plaza.jpg",
         emoji: "🏢",
         rating: 4.5,
         reviews: 42,
@@ -76,7 +76,7 @@ const destinations = [
         description: "A natural wonder and popular eco-tourism destination featuring pristine natural landscapes. Ideal for nature walks and wildlife viewing with educational guide programs available.",
         hours: "8:00 AM - 4:00 PM",
         fee: "₱300/person",
-        image: "hilong-hilong.jpg",
+        image: "images/hilong-hilong.jpg",
         emoji: "🌿",
         rating: 4.7,
         reviews: 41,
@@ -93,7 +93,7 @@ const destinations = [
         description: "Natural cold spring perfect for relaxation and swimming. Surrounded by lush vegetation and located in a picturesque natural setting ideal for nature lovers.",
         hours: "6:00 AM - 8:00 PM",
         fee: "₱250/person",
-        image: "Lusong Cold Spring.jpg",
+        image: "images/Lusong Cold Spring.jpg",
         emoji: "💧",
         rating: 4.5,
         reviews: 34,
@@ -110,7 +110,7 @@ const destinations = [
         description: "An authentic park showcasing local culture and community heritage. Perfect for experiencing traditional activities, crafts, and local livelihood programs.",
         hours: "9:00 AM - 3:00 PM",
         fee: "₱400/person",
-        image: "Atega Park.jpg",
+        image: "images/Atega Park.jpg",
         emoji: "🏞️",
         rating: 4.9,
         reviews: 28,
@@ -127,7 +127,7 @@ const destinations = [
         description: "Scenic river destination with beautiful waterfalls and hiking trails. Suitable for all fitness levels with rest stops and viewpoints along the way.",
         hours: "6:00 AM - 5:00 PM",
         fee: "₱200/person (guide included)",
-        image: "River Tugnaw.jpg",
+        image: "images/River Tugnaw.jpg",
         emoji: "💦",
         rating: 4.7,
         reviews: 36,
@@ -144,7 +144,7 @@ const destinations = [
         description: "A scenic dike offering beautiful views and recreational opportunities. Perfect for cycling, walking, and enjoying outdoor activities with panoramic water views.",
         hours: "7:00 AM - 5:00 PM",
         fee: "₱100/person",
-        image: "Sabang Dike.jpg",
+        image: "images/Sabang Dike.jpg",
         emoji: "🚴",
         rating: 4.6,
         reviews: 30,
@@ -161,7 +161,7 @@ const destinations = [
         description: "A natural cold spring destination offering a refreshing swimming experience in a pristine natural environment. Perfect for those seeking authentic nature-based activities.",
         hours: "6:00 AM - 6:00 PM",
         fee: "₱150/person",
-        image: "Tumipi Cold Spring.webp",
+        image: "images/Tumipi Cold Spring.webp",
         emoji: "🌊",
         rating: 4.6,
         reviews: 32,
@@ -962,6 +962,12 @@ function handleLoginSubmit(event) {
         alert('✓ Login successful! Welcome back.');
         updateAuthUI();
         closeLoginModal();
+        
+        // Re-initialize the current page if it's the booking page
+        const activePage = document.querySelector('.page.active');
+        if (activePage && activePage.id === 'booking-page') {
+            initBooking();
+        }
     } else {
         alert('✗ ' + result.message);
     }
